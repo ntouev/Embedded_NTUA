@@ -22,6 +22,7 @@ if __name__ == '__main__':
 
             avg = suma/iterations
             print('Block size', N, ':', str.format('{0:.6f}', avg), 'sec')
+            
     elif sys.argv[1] == 'phods_opt_2dimensions':
         N = 144
         M = 176

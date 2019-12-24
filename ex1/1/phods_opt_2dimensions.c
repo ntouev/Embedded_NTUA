@@ -1,5 +1,7 @@
-/*Parallel Hierarchical One-Dimensional Search for motion estimation*/
-/*Initial algorithm - Used for simulation and profiling             */
+/*
+ * Loop optimized phods algorithm.
+ * Input: Bx and By, dimensions of the rectangular Block size. (default 16x16)
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
