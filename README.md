@@ -4,7 +4,7 @@
 * Loop transformations.
 * Design space exploration.
 * Pareto optimization.
-* Automated optimazation with [Orio](http://brnorris03.github.io/Orio/).
+* Automated optimization with [Orio](http://brnorris03.github.io/Orio/).
 
 ## ex2
 * Dynamic data types optimization.
