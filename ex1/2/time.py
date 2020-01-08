@@ -6,14 +6,14 @@ from subprocess import check_output
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print("Usage: time.py [phods/phods_opt] <iterations>")
+        print("Usage: python3 time.py [tables/tables_opt_*] <iterations>")
         raise SystemExit
 
     cmd = ['./' + sys.argv[1]]
     iterations = int(sys.argv[2])
 
     suma = 0
-    min = 1
+    min = 100
     max = 0
 
     for i in range(iterations):

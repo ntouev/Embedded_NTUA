@@ -1,3 +1,8 @@
+# Σχεδίαση Ενσωματωμένων Συστημάτων
+## 1η εργαστηριακή άσκηση 2019-2020
+## ΝΤΟΥΡΟΣ ΕΥΑΓΓΕΛΟΣ 03112905
+
+
 # Ζητούμενο 1ο
 ## Ερωτημα 1
 | Λειτουργικό Σύστημα | Έκδοση πυρήνα Linux |
@@ -419,3 +424,109 @@ $ python3 boxplot.py
 ![](./1/boxplot.png)
 
 # Ζητούμενο 2ο
+
+## Eρώτημα 1
+
+Αντίστοιχα με το πρώτο ζητούμενο εισάγουμε τη συνάρτηση **gettimeofday()** στον κώδικα του αρχείου **tables.c** ώστε να μπορεί να γίνει μέτρηση με ακρίβεια microsecond του χρόνου εκτέλεσης του βασικού for loop του κώδικα.
+
+```c
+gettimeofday(&ts,NULL);
+
+/*
+Τhis is the basic loop of tables.c. Isolate it in file tables_orio.c,
+in which all the parameters for Design Space Exploration (DSE) and loop
+transfornations should be defined.
+*/
+for (i=0; i<=N-1; i++)
+{
+    //This loop needs to be modified after Orio's execution...
+    y[i] = y[i] + a1*x1[i] + a2*x2[i] + a3*x3[i];
+}
+
+gettimeofday(&tf,NULL);
+time=(tf.tv_sec-ts.tv_sec)+(tf.tv_usec-ts.tv_usec)*0.000001;
+printf("%lf", time);
+```
+
+
+Εκτελώντας το  python script,
+```console
+$ python3 time.py tables 10
+```
+
+παίρνουμε τον ελάχιστο, μέγιστο και μέσο χρόνο εκτέλεσης:
+
+|Minimum|Maximum|Average|
+|:-:|:-:|:-:|
+|0.533641 sec|0.568850 sec|0.541579 sec|
+
+## Eρώτημα 2
+
+Eδώ θα βελτιστοποιήσουμε τον κώδικα του αρχείου tables.c με χρήση του εργαλείου **Οrio**. Συγκεκριμένα θα βρεθεί το βέλτιστο loop unrolling για το for loop που μας ενδιαφέρει χρησιμοποιώντας 3 διαφορετικές τεχνικές.
+
+#### Exhaustive
+Τρέχοντας
+```console
+$ sudo orcc tables_orio_exhaustive.c
+```
+παράγεται το αρχείο **_tables_orio_exhaustive.c** που περιέχει το loop unrolling me **UF (unroll factor) = 6**.
+
+```c
+for (i=0; i<=N-6; i=i+6) {
+  y[i]=y[i]+a1*x1[i]+a2*x2[i]+a3*x3[i];
+  y[(i+1)]=y[(i+1)]+a1*x1[(i+1)]+a2*x2[(i+1)]+a3*x3[(i+1)];
+  y[(i+2)]=y[(i+2)]+a1*x1[(i+2)]+a2*x2[(i+2)]+a3*x3[(i+2)];
+  y[(i+3)]=y[(i+3)]+a1*x1[(i+3)]+a2*x2[(i+3)]+a3*x3[(i+3)];
+  y[(i+4)]=y[(i+4)]+a1*x1[(i+4)]+a2*x2[(i+4)]+a3*x3[(i+4)];
+  y[(i+5)]=y[(i+5)]+a1*x1[(i+5)]+a2*x2[(i+5)]+a3*x3[(i+5)];
+}
+for (i=N-((N-(0))%6); i<=N-1; i=i+1)
+  y[i]=y[i]+a1*x1[i]+a2*x2[i]+a3*x3[i];
+```
+
+#### Simplex
+Τρέχοντας
+```console
+$ sudo orcc tables_orio_simplex.c
+```
+παράγεται το αρχείο **_tables_orio_simplex.c** που περιέχει το loop unrolling me **UF = 5**.
+
+```c
+for (i=0; i<=N-5; i=i+5) {
+  y[i]=y[i]+a1*x1[i]+a2*x2[i]+a3*x3[i];
+  y[(i+1)]=y[(i+1)]+a1*x1[(i+1)]+a2*x2[(i+1)]+a3*x3[(i+1)];
+  y[(i+2)]=y[(i+2)]+a1*x1[(i+2)]+a2*x2[(i+2)]+a3*x3[(i+2)];
+  y[(i+3)]=y[(i+3)]+a1*x1[(i+3)]+a2*x2[(i+3)]+a3*x3[(i+3)];
+  y[(i+4)]=y[(i+4)]+a1*x1[(i+4)]+a2*x2[(i+4)]+a3*x3[(i+4)];
+}
+for (i=N-((N-(0))%5); i<=N-1; i=i+1)
+  y[i]=y[i]+a1*x1[i]+a2*x2[i]+a3*x3[i];
+```
+
+
+## Eρώτημα 3
+Aφου ενσωματώσουμε το βελτιστοποιημένο for loop στο αρχείο tables.c παίρνουμε τα αρχεία **tables_opt_exhaustive.c** και **tables_opt_simplex.c**
+
+Τρέχοντας το Python script με ορίσματα τους βελτιστοποιημένους κώδικες
+```console
+$ python3 time.py tables_opt_exhaustive 10
+$ python3 time.py tables_opt_simplex 10
+```
+παίρνουμε του χρόνους εκτέλεσης για τους νέους κώδικες.
+
+###### Minimum
+|tables.c|tables_opt_exhaustive|tables_opt_simplex|
+|:-:|:-:|:-:|
+|0.533641 sec|0.334026 sec|0.350367 sec|
+
+###### Maximum
+|tables.c|tables_opt_exhaustive|tables_opt_simplex|
+|:-:|:-:|:-:|
+|0.568850 sec|0.423389 sec|0.604013|
+
+###### Average
+|tables.c|tables_opt_exhaustive|tables_opt_simplex|
+|:-:|:-:|:-:|
+|0.541579 sec|0.353514 sec|0.419161 sec|
+
+Όπως είναι εύκολα αντιληπτό η βελτιστοποίηση με **exhaustive** πετυχαίνει την καλύτερη επίδοση καθώς με αυτήν την τεχνική γίνεται πιο εξαντλητική αναζήτηση σε σχέση με την τεχνική **simplex**. Πάντως και οι δύο τεχνικές, όπως αναμένοταν, βελτιώνουν την επίδοση του αρχικού κώδικα.

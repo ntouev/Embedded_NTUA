@@ -1,3 +1,7 @@
+/*
+ * tables.c optimized with exhaustive techique by Orio
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -32,17 +36,20 @@ int main()
 
 
     gettimeofday(&ts,NULL);
-    
+
 	/*
-	Τhis is the basic loop of tables.c. Isolate it in file tables_orio.c,
-	in which all the parameters for Design Space Exploration (DSE) and loop
-	transfornations should be defined.
+     Optimized with Orio (exhaustive algorithm)
 	*/
-	for (i=0; i<=N-1; i++)
-	{
-		//This loop needs to be modified after Orio's execution...
-		y[i] = y[i] + a1*x1[i] + a2*x2[i] + a3*x3[i];
-	}
+    for (i=0; i<=N-6; i=i+6) {
+      y[i]=y[i]+a1*x1[i]+a2*x2[i]+a3*x3[i];
+      y[(i+1)]=y[(i+1)]+a1*x1[(i+1)]+a2*x2[(i+1)]+a3*x3[(i+1)];
+      y[(i+2)]=y[(i+2)]+a1*x1[(i+2)]+a2*x2[(i+2)]+a3*x3[(i+2)];
+      y[(i+3)]=y[(i+3)]+a1*x1[(i+3)]+a2*x2[(i+3)]+a3*x3[(i+3)];
+      y[(i+4)]=y[(i+4)]+a1*x1[(i+4)]+a2*x2[(i+4)]+a3*x3[(i+4)];
+      y[(i+5)]=y[(i+5)]+a1*x1[(i+5)]+a2*x2[(i+5)]+a3*x3[(i+5)];
+    }
+    for (i=N-((N-(0))%6); i<=N-1; i=i+1)
+      y[i]=y[i]+a1*x1[i]+a2*x2[i]+a3*x3[i];
 
     gettimeofday(&tf,NULL);
     time=(tf.tv_sec-ts.tv_sec)+(tf.tv_usec-ts.tv_usec)*0.000001;
