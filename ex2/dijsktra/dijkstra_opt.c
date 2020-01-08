@@ -1,9 +1,24 @@
 /*
- * Νon optimized dijkstra algorithm.
+ * Optimized dijkstra algorithm with DDTR library.
+ * The library's header files are in directory ../synch_implementations
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+
+//#define SLL
+//#define DLL
+#define DYN_ARR
+
+#if defined(SLL)
+#include "../synch_implementations/cdsl_queue.h"
+#endif
+#if defined(DLL)
+#include "../synch_implementations/cdsl_deque.h"
+#endif
+#if defined(DYN_ARR)
+#include "../synch_implementations/cdsl_dyn_array.h"
+#endif
 
 #define NUM_NODES                          100
 #define NONE                               9999
@@ -18,11 +33,22 @@ struct _QITEM {
     int iNode;
     int iDist;
     int iPrev;
-    struct _QITEM *qNext;
+    //struct _QITEM *qNext;
 };
 typedef struct _QITEM QITEM;
 
-QITEM *qHead = NULL;
+#if defined(SLL)
+cdsl_sll *qHead;
+#endif
+#if defined(DLL)
+cdsl_dll *qHead;
+#endif
+#if defined(DYN_ARR)
+cdsl_dyn_array *qHead;
+#endif
+
+//QITEM *qHead = NULL;
+
 int AdjMatrix[NUM_NODES][NUM_NODES];
 int g_qCount = 0;
 NODE rgnNodes[NUM_NODES];
@@ -30,6 +56,18 @@ int ch;
 int iPrev, iNode;
 int i, iCost, iDist;
 
+void initialize()
+{
+#if defined(SLL)
+    qHead = cdsl_sll_init();
+#endif
+#if defined(DLL)
+    qHead = cdsl_dll_init();
+#endif
+#if defined(DYN_ARR)
+    qHead = cdsl_dyn_array_init();
+#endif
+}
 
 void print_path (NODE *rgnNodes, int chNode)
 {
@@ -45,7 +83,7 @@ void print_path (NODE *rgnNodes, int chNode)
 void enqueue (int iNode, int iDist, int iPrev)
 {
     QITEM *qNew = (QITEM *) malloc(sizeof(QITEM));
-    QITEM *qLast = qHead;
+    //QITEM *qLast = qHead;
 
     if (!qNew)
     {
@@ -55,32 +93,47 @@ void enqueue (int iNode, int iDist, int iPrev)
     qNew->iNode = iNode;
     qNew->iDist = iDist;
     qNew->iPrev = iPrev;
-    qNew->qNext = NULL;
+    //qNew->qNext = NULL;
 
-    if (!qLast)
-    {
-        qHead = qNew;
-    }
-    else
-    {
-        while (qLast->qNext) qLast = qLast->qNext;
-        qLast->qNext = qNew;
-    }
+    //if (!qLast)
+    //{
+    //    qHead = qNew;
+    //}
+    //else
+    //{
+    //    while (qLast->qNext) qLast = qLast->qNext;
+    //    qLast->qNext = qNew;
+    //}
+    qHead->enqueue(0, qHead, (void *)qNew);
+
     g_qCount++;
 }
 
 
 void dequeue (int *piNode, int *piDist, int *piPrev)
 {
-    QITEM *qKill = qHead;
+#if defined(SLL)
+    iterator_cdsl_sll it;
+#endif
+#if defined(DLL)
+    iterator_cdsl_dll it;
+#endif
+#if defined(DYN_ARR)
+    iterator_cdsl_dyn_array it;
+#endif
+
+    it = qHead->iter_begin(qHead);
+
+    QITEM *qKill = (QITEM *)qHead->iter_deref(qHead, it);
 
     if (qHead)
     {
-        *piNode = qHead->iNode;
-        *piDist = qHead->iDist;
-        *piPrev = qHead->iPrev;
-        qHead = qHead->qNext;
-        free(qKill);
+        *piNode = qKill->iNode;
+        *piDist = qKill->iDist;
+        *piPrev = qKill->iPrev;
+        //qHead = qHead->qNext;
+        //free(qKill);
+        qHead->remove(0, qHead, qKill);
         g_qCount--;
     }
 }
@@ -145,6 +198,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: dijkstra <filename>\n");
         fprintf(stderr, "Only supports matrix size is #define'd.\n");
     }
+
+    initialize();
 
     /* open the adjacency matrix file */
     fp = fopen (argv[1],"r");

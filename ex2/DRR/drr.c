@@ -1,4 +1,3 @@
-
 #ifndef _DRR_C_
 #define _DRR_C_
 
@@ -46,9 +45,9 @@ int main(int argc, char **argv) {
 #elif defined (DLL_CL)
 	iterator_cdsl_dll it, end;
 	clientList = cdsl_dll_init();
-#else 
+#else
 	iterator_cdsl_dyn_array it, end;
-	clientList = cdsl_dyn_array_init();	
+	clientList = cdsl_dyn_array_init();
 #endif
 	unsigned a=0;
 	int rounds = 1783;
@@ -60,13 +59,13 @@ int main(int argc, char **argv) {
 		for (k = 0; k < mallocs[a]; k++) {
 			packet = get_next_packet(psrc[a], pdst[a], psize[a]);
 			Node* n = find_node(packet, node_head);
-			insert_packet(packet, n);		
+			insert_packet(packet, n);
 		}
 		it = clientList->iter_begin(clientList);
 		end = clientList->iter_end(clientList);
 
 		//printf("---------------------\n");
-		for (;it != end; it = clientList->iter_next(it)) {		
+		for (;it != end; it = clientList->iter_next(it)) {
 			v = (Node*)(clientList->iter_deref(clientList, it));
 			//printf("node: %d with deficit: %d\n", v->src_ip, v->deficit);
 		}
@@ -74,7 +73,7 @@ int main(int argc, char **argv) {
 		for (k = 0; k < frees[a]; k++) {
 			Packet* forwarded_packet = forward_packet(node_head);
 			if(forwarded_packet!=NULL)
-			{	
+			{
 				//printf("forwarded with: %d\n", forwarded_packet->size);
 				free(forwarded_packet);
 			}
@@ -86,7 +85,7 @@ int main(int argc, char **argv) {
 #ifndef _GET_NEXT_PACKET_
 #define _GET_NEXT_PACKET_
 Packet* get_next_packet(unsigned int psrc_ip, unsigned int pdst_ip, unsigned int size)
-{ 
+{
 	Packet *npacket = (Packet*)malloc(sizeof(Packet));
 	npacket->src = psrc_ip;
 	npacket->dst = pdst_ip;
@@ -125,7 +124,7 @@ Node* find_node(Packet* packet, Node* node_head)
 	new_node->pList = cdsl_sll_init();
 #elif defined (DLL_PK)
 	new_node->pList = cdsl_dll_init();
-#else 
+#else
 	new_node->pList = cdsl_dyn_array_init();
 #endif
 	clientList->enqueue(0, clientList, (void*)new_node);
@@ -142,7 +141,7 @@ void insert_packet(Packet* packet, Node* node) {
 		node->pList->enqueue(0, node->pList, (void*)packet);
 		return;
 	}
-	else {		
+	else {
 		node->no_of_packets++;
 		//place the packet in the last position of the packet list
 		node->pList->enqueue(0, node->pList, (void*)packet);
@@ -172,7 +171,7 @@ Packet* forward_packet(Node* node_head) {
 	it = clientList->iter_begin(clientList);
 	for (;it != end; it = clientList->iter_next(it)) {
 		v = (Node*)(clientList->iter_deref(clientList, it));
-		if(v != NULL && v->src_ip != 0 && v->no_of_packets > 0) { //making sure it is not the deficit_head	
+		if(v != NULL && v->src_ip != 0 && v->no_of_packets > 0) { //making sure it is not the deficit_head
 			first_packet = v->pList->get_head(0, v->pList);
 			if(v->deficit >= first_packet->size) {
 				v->deficit -= first_packet->size;
