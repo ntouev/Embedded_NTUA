@@ -4,6 +4,7 @@ Just a small **ciphering** program implemented in ARM assembly.
 
 It receives a string of 32 bytes and encryptes it with a dummy algorithm:
 * a..z --> A..Z
+* A..Z --> a..z
 * 0..4 --> 5..9
 * 5..9 --> 0..4
 
