@@ -12,4 +12,9 @@
 * Memory footprint and memory accesses with with [Valgrind](https://valgrind.org/).
 
 ## ex3
-* ARM assembly
+* ARM assembly.
+
+## ex4
+* Cross-compiling for ARM architectures ([crosstool-ng](https://github.com/crosstool-ng/crosstool-ng) and [linaro](https://www.linaro.org/downloads/)).
+* Custom Linux kernel install in ARM architecture.
+* Custom syscalls.
