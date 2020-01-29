@@ -10,6 +10,13 @@
 
 Επιλέξαμε την αρχιτεκτονική "arm-cortexa9_neon-linux-gnueabihf" επειδή κανουμε target το VM της πρώτης άσκησης που έκανε emulate arm αρχιτεκτονική. Σε άλλη περίπτωση το εκτελέσιμο δεν θα μπορούσε να τρέξει στο συγκεκριμένο VM.
 
+Aυτή η αναπαράσταση αναλύεται ως εξής:
+* Αρχιτεκτονική **arm**.
+* Eπεγεργαστής **cortexa9** με επέκταση **neon** για SIMD εντολές.
+* Πυρήνας **Linux**.
+* Yπάρχει υποστήριξη **embedded-application binary interface (eabi)**.
+* **Hard float**.
+
 ## 2
 Έγινε χρήση της βιβλιοθήλης **glibc**. Aυτό φαίνεται χρησιμοποιώντας την εντολή
 
@@ -125,8 +132,8 @@ $ ls -l
 ```
 παίρνουμε output
 ```console
--rwxrwxr-x 1 giorgio giorgio  16248 Ιαν  25 19:54 phods_crosstool.out
--rwxrwxr-x 1 giorgio giorgio   8236 Ιαν  25 20:54 phods_linaro.out
+-rwxrwxr-x 1 vaggelis vaggelis  16248 Ιαν  25 19:54 phods_crosstool.out
+-rwxrwxr-x 1 vaggelis vaggelis   8236 Ιαν  25 20:54 phods_linaro.out
 ```
 Βλέπουμε, λοιπόν, πως το εκτελέσιμο **phods_crosstool.out** έχει διπλάσιο μέγεθος (**16KB**) σε σχέση με το εκτελέσιμο **phods_linaro.out** (**8KB**).
 
@@ -173,3 +180,69 @@ $ ~/linaro/gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux/bin/ \
 Θα εκτελεστεί διότι πλέον το εκτελέσιμο έχει ενσωματωμένο το binary της νέας βιβλιοθήκης (αφού κάναμε compile με το flag -static).
 
 # Άσκηση 2
+Υπήρξε πρόβλημα με την εφαρμογή του patch αρχείου οπότε κάναμε manually τις αλλαγες στο αρχείο **./scripts/pachage/builddeb**.
+
+Ύστερα και από αυτό το βήμα το compile πέταγε error. Δοκιμάστηκε και ο linaro cross-compiler χωρις επιτυχία.
+
+Στη συνέχεια περιγράφεται η υλοποίηση (αναγκαστικά θεωρητικά) του custom system call **sys_hello**.
+
+## 2
+
+Aρχικά φτιάχνουμε ένα φάκελο **./hello** στο parent directory με δύο αρχεία:
+* hello.c
+* Makefile
+
+#### hello.c
+```c
+#include <linux/kernel.h>
+
+asmlinkage long sys_hello(void)
+{
+        printk(KERN_ALERT "Greeting from kernel and team !\n");
+        return 0;
+}
+```
+#### Makefile
+```Makefile
+obj-y := hello.o
+```
+
+Στο αρχείο **./include/linux/syscalls.h** προσθέτουμε
+```c
+asmlinkage long sys_hello(void);
+```
+
+Μετά προσθέτουμε την παρακάτω γραμμή στο αρχείο **./arch/arm/include/asm/unistd.h**
+```c
+define __NR_sys_hello           (__NR_SYSCALL_BASE+386)
+```
+
+Ύστερα προσθέτουμε στο αρχείο **./arch/arm/kernel/calls.S**
+```c
+CALL(sys_hello)
+```
+
+
+
+Τέλος τροποποιούμε την παρακάτω μία γραμμή στο αρχείο **./Makefile**
+```Makefile
+από
+core-y += kernel/ mm/ fs/ ipc/ security/ crypto/ block/
+
+σε
+core-y += kernel/ mm/ fs/ ipc/ security/ crypto/ block/ hello/
+```
+
+Κάνουμε compile και φορτώνουμε το νέο πυρήνα με την νέα κλήση συστήματος. Στο επόμενο ερώτημα παρατίθεται ο κώδικας ενός test αρχείου για τον έλεγχο της ορθής λειτουργίας του νέου system call.
+## 3
+
+#### test.c
+
+```c
+#include <asm/unistd.h>
+
+int main() {
+    syscall(__NR_sys_hello);
+    return 0;
+}
+```

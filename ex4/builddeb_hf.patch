@@ -1,0 +1,33 @@
+--- builddeb.orig	2020-01-27 15:15:03.653971021 +0200
++++ builddeb	2020-01-27 16:00:44.405691750 +0200
+@@ -43,18 +43,19 @@
+ 	mips*)
+ 		debarch=mips$(grep -q CPU_LITTLE_ENDIAN=y $KCONFIG_CONFIG && echo el || true) ;;
+ 	arm64)
+-		debarch=armhf ;; #$(grep -q CONFIG_AEABI=y $KCONFIG_CONFIG && echo el || true) ;;
++		debarch=arm64 ;;
+ 	arm*)
+-		if grep -q CONFIG_AEABI=y $KCONFIG_CONFIG; then
+-		    if grep -q CONFIG_VFP=y $KCONFIG_CONFIG; then
+-			debarch=armhf
+-		    else
+-			debarch=armel
+-		    fi
+-		else
+-		    debarch=arm
+-		fi
+-		;;
++		debarch=armhf ;;
++		#if grep -q CONFIG_AEABI=y $KCONFIG_CONFIG; then
++		#    if grep -q CONFIG_VFP=y $KCONFIG_CONFIG; then
++		#	debarch=armhf
++		#    else
++		#	debarch=armel
++		#    fi
++		#else
++		#    debarch=arm
++		#fi
++		#;;
+ 	*)
+ 		echo "" >&2
+ 		echo "** ** **  WARNING  ** ** **" >&2
